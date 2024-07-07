@@ -7,7 +7,7 @@ from random import randint
 class Client:
     _count = 0
 
-    def __init__(self, conn, nickname):
+    def __init__(self, conn, nickname=''):
         self.conn = conn
         self.nickname = nickname
         Client._count += 1
@@ -28,7 +28,7 @@ class Client:
             try:
                 message = self.conn.recv(1024).decode('utf-8')
                 if message:
-                    print(message)
+                    return message
                 else:
                     break
             except (ConnectionResetError, ConnectionAbortedError, socket.error) as e:
@@ -36,13 +36,11 @@ class Client:
                 self.conn.close()
                 break
 
-    def send_messages(self):
-        while True:
-            message = input('')
-            if message.startswith('/nickname'):
-                self.conn.send(message.encode('utf-8'))
-            else:
-                self.conn.send(f'{self.nickname}: {message}'.encode('utf-8'))
+    def send_messages(self, message):
+        if message.startswith('/nickname'):
+            self.conn.send(message.encode('utf-8'))
+        else:
+            self.conn.send(f'{message}'.encode('utf-8'))
 
     def discover_server(self):
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -62,11 +60,11 @@ class Client:
             self.conn.connect((server_ip, server_port))
             print("Connected to the server")
 
-            receive_thread = threading.Thread(target=self.receive_messages)
-            receive_thread.start()
-
-            send_thread = threading.Thread(target=self.send_messages)
-            send_thread.start()
+            # receive_thread = threading.Thread(target=self.receive_messages)
+            # receive_thread.start()
+            #
+            # send_thread = threading.Thread(target=self.send_messages)
+            # send_thread.start()
         except Exception as e:
             print(f"Could not connect to the server: {e}")
 
@@ -135,3 +133,11 @@ class Server:
             receive_thread = threading.Thread(target=self.__receive, args=(conn,))
             receive_thread.start()
 
+
+def main():
+    server = Server()
+    server.start()
+
+
+if __name__ == "__main__":
+    main()
