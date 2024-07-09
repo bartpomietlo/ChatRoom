@@ -5,7 +5,7 @@ import socket
 import tkinter
 import threading
 
-# Client declaration
+# Client initialization
 client = sf.Client(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
 server_ip, server_port = client.discover_server()
 threading.Thread(target=client.start, args=(server_ip, server_port)).start()
@@ -43,12 +43,20 @@ s_button = CTkButton(master=input_frame, text="Send", command=send_message)
 s_button.pack(side="right")
 
 # Create frame for sent messages
-frame = CTkFrame(master=root)
-frame.pack(side="top", fill="both", expand=True)
+scr_frame = CTkScrollableFrame(master=root)
+scr_frame.pack(side="top", fill="both", expand=True)
 
 
 def display_message(message, align):
-    message_label = CTkLabel(master=frame, text=message, bg_color='blue', anchor='w' if align == 'left' else 'e')
+    # Calculate the width of the message frame based on message length
+    width = min(max(100, len(message) * 8), 400)
+
+    message_frame = CTkFrame(master=scr_frame, fg_color='#7F85A1' if align == 'left' else '#6D9EDB', width=width)
+    message_frame.pack(anchor='w' if align == 'left' else 'e', padx=10, pady=5)
+
+    message_label = CTkLabel(master=message_frame, text=message, text_color='black',
+                             anchor='w' if align == 'left' else 'e', wraplength=width - 10,
+                             font=("Helvetica", 18))
     message_label.pack(anchor='w' if align == 'left' else 'e', padx=10, pady=5)
 
 
@@ -65,8 +73,3 @@ threading.Thread(target=handle_incoming_messages).start()
 
 # Start the main loop
 root.mainloop()
-
-
-
-
-
